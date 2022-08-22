@@ -75,7 +75,7 @@ class Residual(Module):
         return self.model(x)
 
 class MobileFaceNet(Module):
-    def __init__(self, embedding_size):
+    def __init__(self, latent_size):
         super(MobileFaceNet, self).__init__()
         self.conv1 = Conv_block(3, 64, kernel=(3, 3), stride=(2, 2), padding=(1, 1))
         self.conv2_dw = Conv_block(64, 64, kernel=(3, 3), stride=(1, 1), padding=(1, 1), groups=64)
@@ -85,11 +85,22 @@ class MobileFaceNet(Module):
         self.conv_4 = Residual(128, num_block=6, groups=256, kernel=(3, 3), stride=(1, 1), padding=(1, 1))
         self.conv_45 = Depth_Wise(128, 128, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=512)
         self.conv_5 = Residual(128, num_block=2, groups=256, kernel=(3, 3), stride=(1, 1), padding=(1, 1))
-        self.conv_6_sep = Conv_block(128, 512, kernel=(1, 1), stride=(1, 1), padding=(0, 0))
-        self.conv_6_dw = Linear_block(512, 512, groups=512, kernel=(7,7), stride=(1, 1), padding=(0, 0))
-        self.conv_6_flatten = Flatten()
-        self.linear = Linear(512, embedding_size, bias=False)
-        self.bn = BatchNorm1d(embedding_size)
+        
+        # old backend
+        #self.conv_6_sep = Conv_block(128, latent_size, kernel=(1, 1), stride=(1, 1), padding=(0, 0))
+        #self.conv_6_dw = Linear_block(latent_size, latent_size, groups=latent_size, kernel=(7,7), stride=(1, 1), padding=(0, 0))
+        #self.conv_6_flatten = Flatten()
+        #self.linear = Linear(512, embedding_size, bias=False)
+        #self.bn = BatchNorm1d(embedding_size)
+        
+        # new backend
+        self.conv_sep = nn.Conv2d(in_channels=128, out_channels=latent_size, kernel_size=(1,1), stride=(1,1), padding=(0,0), groups=1, bias=False)
+        self.bn_sep = nn.BatchNorm2d(latent_size)
+        self.relu = nn.ReLU()
+        self.conv_dw = nn.Conv2d(latent_size, out_channels=latent_size, kernel_size=(7,7), stride=(1,1), padding=(0,0), groups=latent_size, bias=False)
+        self.bn_dw = nn.BatchNorm2d(latent_size)
+        self.conv_fin = nn.Conv2d(latent_size, out_channels=128, kernel_size=(1,1), stride=(1,1), padding=(0,0), groups=1, bias=False)
+        self.flatten = nn.Flatten()
         
         # weight initialization
         for m in self.modules():
@@ -117,16 +128,14 @@ class MobileFaceNet(Module):
 
         out = self.conv_5(out)
 
-        out = self.conv_6_sep(out)
-
-        out = self.conv_6_dw(out)
-
-        out = self.conv_6_flatten(out)
-
-        out = self.linear(out)
-
-        out = self.bn(out)
-        return l2_norm(out)
+        out = self.conv_sep(out)
+        out = self.bn_sep(out)
+        out = self.relu(out)
+        out = self.conv_dw(out)
+        out = self.bn_dw(out)
+        out = self.conv_fin(out)
+        
+        return out
 
 ##################################  Arcface head #############################################################
 
