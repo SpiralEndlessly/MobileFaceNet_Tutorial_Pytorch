@@ -135,7 +135,7 @@ class MobileFaceNet(Module):
         out = self.bn_dw(out)
         out = self.conv_fin(out)
         
-        return out
+        return self.flatten(out)
 
 ##################################  Arcface head #############################################################
 
