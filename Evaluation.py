@@ -106,7 +106,7 @@ if __name__ == '__main__':
     parser.add_argument('--flip', type=str, default=True, help='if flip the image with time augmentation')
     args = parser.parse_args()
     
-    detect_model = MobileFaceNet(512).to(device)  # embeding size is 512 (feature vector)
+    detect_model = MobileFaceNet(latent_size=320).to(device)  # embeding size is 512 (feature vector)
     detect_model.load_state_dict(torch.load('Weights/MobileFace_Net', map_location=lambda storage, loc: storage))
     print('MobileFaceNet face detection model generated')
 
@@ -121,8 +121,8 @@ if __name__ == '__main__':
     
     if select_dataset == 'LFW':
     
-        root = 'data_set/LFW/lfw_align_112'
-        file_list = 'data_set/LFW/pairs.txt'
+        root = 'data_set/lfw'
+        file_list = 'data_set/lfw/lfw_pair.txt'
         dataset = LFW(root, file_list, transform=transform)
         
     elif select_dataset == 'CFP-FP':

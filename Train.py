@@ -28,7 +28,7 @@ def load_data(batch_size):
         transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])  # range [0.0, 1.0] -> [-1.0,1.0]
 
     root = 'data_set/CASIA/'
-    file_list = 'data_set/CASIA/file_list.txt'
+    file_list = 'data_set/CASIA/file_list_reduced.txt'
     dataset_train = CASIAWebFace(root, file_list, transform=transform)
     
     dataloader = data.DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=2)
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     dataloader, dataset_size, dataset = load_data(args.batch_size)
     model = MobileFaceNet(latent_size=320).to(device)
     print('MobileFaceNet face detection model loaded')
-    margin = Arcface(embedding_size=128, classnum=int(dataset['train'].class_nums),  s=32., m=0.5).to(device)
+    margin = Arcface(embedding_size=128, classnum=int(dataset.class_nums),  s=32., m=0.5).to(device)
     
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer_ft = optim.SGD([
