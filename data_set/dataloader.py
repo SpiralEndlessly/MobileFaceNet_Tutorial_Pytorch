@@ -34,17 +34,11 @@ class LFW(data.Dataset):
         with open(file_list) as f:
             pairs = f.read().splitlines()[1:]
         for i, p in enumerate(pairs):
-            p = p.split('\t')
-            if len(p) == 3:
-                nameL = p[0] + '/' + p[0] + '_' + '{:04}.jpg'.format(int(p[1]))
-                nameR = p[0] + '/' + p[0] + '_' + '{:04}.jpg'.format(int(p[2]))
-                fold = i // 600
-                flag = 1
-            elif len(p) == 4:
-                nameL = p[0] + '/' + p[0] + '_' + '{:04}.jpg'.format(int(p[1]))
-                nameR = p[2] + '/' + p[2] + '_' + '{:04}.jpg'.format(int(p[3]))
-                fold = i // 600
-                flag = -1
+            p = p.split(' ')
+            nameL = p[0]
+            nameR = p[1]
+            flag = int(p[2])
+            fold = i // 600
             self.nameLs.append(nameL)
             self.nameRs.append(nameR)
             self.folds.append(fold)

@@ -107,7 +107,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     detect_model = MobileFaceNet(latent_size=320).to(device)  # embeding size is 512 (feature vector)
-    detect_model.load_state_dict(torch.load('Weights/MobileFace_Net', map_location=lambda storage, loc: storage))
+    detect_model.load_state_dict(torch.load('Weights/Retrained', map_location=lambda storage, loc: storage)["net_state_dict"])
     print('MobileFaceNet face detection model generated')
 
     detect_model.eval()
