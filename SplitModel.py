@@ -78,7 +78,7 @@ if __name__ == '__main__':
     LoadPartialStateDict(back, state_dict)
 
     dummy_input = torch.randn(1, 3, 112, 112, device=device)
-    torch.onnx.export(front, dummy_input, "MobileFaceNet_Front.onnx", input_names=["input"], output_names=["output"], do_constant_folding=True, opset_version=14)
+    torch.onnx.export(front, dummy_input, "MobileFaceNet_Front.onnx", input_names=["input"], output_names=["output"], do_constant_folding=True, export_params=True, opset_version=14)
 
     dummy_input = torch.randn(1, 128, 7, 7, device=device)
-    torch.onnx.export(back, dummy_input, "MobileFaceNet_ReducedBack.onnx", input_names=["input"], output_names=["output"], do_constant_folding=True, opset_version=14)
+    torch.onnx.export(back, dummy_input, "MobileFaceNet_ReducedBack.onnx", input_names=["input"], output_names=["output"], do_constant_folding=True, export_params=True, opset_version=14)
