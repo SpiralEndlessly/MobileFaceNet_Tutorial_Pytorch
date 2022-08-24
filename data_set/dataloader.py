@@ -32,7 +32,7 @@ class LFW(data.Dataset):
         self.flags = []
 
         with open(file_list) as f:
-            pairs = f.read().splitlines()[1:]
+            pairs = f.read().splitlines()[0:]
         for i, p in enumerate(pairs):
             p = p.split(' ')
             nameL = p[0]
