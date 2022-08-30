@@ -9,8 +9,9 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 import onnxruntime
 
 if __name__ == '__main__':
-    test_data_path = "C:/test_data"
-    TEST_IDS = [1, 3, 5, 7, 9, 601, 603, 609]
+    CONCRETE_PATH = "C:/shallow/"
+    TENSEAL_PATH = "C:/tenseal-inference/shallow/"
+    TEST_IDS = [2, 4, 6, 602, 604, 606]
 
     root = 'data_set/lfw'
     file_list = 'data_set/lfw/lfw_pair.txt'
@@ -28,30 +29,28 @@ if __name__ == '__main__':
 
     detect_model.eval()
 
-    print(f"              Clear |     TenSEAL     |     Concrete")
+    print(f"      Clear |     TenSEAL     |     Concrete    |   ConcreteNew")
 
     for id in TEST_IDS:
-        index = (id - 1) // 2
+        index = (id - 2) // 2
 
-        left_image = dataset[index][0].unsqueeze(0).detach().numpy()
-        right_image = dataset[index][2].unsqueeze(0).detach().numpy()
+        left_image = dataset[index][2].unsqueeze(0).detach().numpy()
+        right_image = dataset[index][0].unsqueeze(0).detach().numpy()
 
-        tenseal = np.load(os.path.join(test_data_path, f"{id:05d}_ten.npy")).squeeze()
-        concrete = np.load(os.path.join(test_data_path, f"{id:05d}_con.npy")).squeeze()
-        #left = detect_model(dataset[index][0].unsqueeze(0)).detach().numpy().squeeze()
-        #right = detect_model(dataset[index][2].unsqueeze(0)).detach().numpy().squeeze()
+        tenseal = np.load(os.path.join(TENSEAL_PATH, f"{id:05d}_ten.npy")).squeeze()
+        concrete = np.load(os.path.join(CONCRETE_PATH, f"{id:05d}_con.npy")).squeeze()
+        con_new = np.load(os.path.join(CONCRETE_PATH, f"{id:05d}_new.npy")).squeeze()
 
         left = frontend.run(None, {"input": left_image})[0]
-        right = frontend.run(None, {"input": right_image})[0]
-
         left = backend.run(None, {"input": left})[0].squeeze()
+        right = frontend.run(None, {"input": right_image})[0]
         right = backend.run(None, {"input": right})[0].squeeze()
 
         tenseal_norm = np.sqrt(np.sum(np.power(tenseal, 2)))
         concrete_norm = np.sqrt(np.sum(np.power(concrete, 2)))
+        con_new_norm = np.sqrt(np.sum(np.power(con_new, 2)))
         left_norm = np.sqrt(np.sum(np.power(left, 2)))
         right_norm = np.sqrt(np.sum(np.power(right, 2)))
-
 
         clear_score = np.dot(left / left_norm, right / right_norm)
 
@@ -59,5 +58,10 @@ if __name__ == '__main__':
         tenseal_similarity = np.dot(left / left_norm, tenseal / tenseal_norm)
         concrete_score = np.dot(concrete / concrete_norm, right / right_norm)
         concrete_similarity = np.dot(left / left_norm, concrete / concrete_norm)
+        con_new_score = np.dot(con_new / con_new_norm, right / right_norm)
+        con_new_similarity = np.dot(left / left_norm, con_new / con_new_norm)
 
-        print(f"{id:05d}-{id+1:05d}: {clear_score: .3f} | {tenseal_score: .3f} ({tenseal_similarity: .3f}) | {concrete_score: .3f} ({concrete_similarity: .3f})")
+        print(f"{id:03d}: {clear_score: .3f} | {tenseal_score: .3f} ({tenseal_similarity: .3f}) | {concrete_score: .3f} ({concrete_similarity: .3f}) | {con_new_score: .3f} ({con_new_similarity: .3f})")
+
+        #for i in range(len(tenseal)):
+        #    print(f"{tenseal[i]} vs {right[i]}")
