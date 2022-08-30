@@ -18,7 +18,5 @@ if __name__ == '__main__':
 
     for i, faces in enumerate(dataset):
         left = front.run(None, {"input": np.expand_dims(faces[0].detach().numpy(), 0)})
-        right = front.run(None, {"input": np.expand_dims(faces[2].detach().numpy(), 0)})
         
-        np.save(os.path.join(out_root, f"{2*i:05d}.npy"), left[0])
-        np.save(os.path.join(out_root, f"{2*i+1:05d}.npy"), right[0])
+        np.save(os.path.join(out_root, f"{2*i+1:05d}.npy"), left[0])
