@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 if __name__ == '__main__':
-    front = ort.InferenceSession("MobileFaceNet_Front.onnx")
+    front = ort.InferenceSession("MobileFaceNet_FrontShallow.onnx")
 
     transform = transforms.Compose([
             transforms.ToTensor(),  
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     file_list = 'data_set/lfw/lfw_pair.txt'
     dataset = LFW(root, file_list, transform=transform)
 
-    out_root = 'data_set/lfw_latent'
+    out_root = 'data_set/lfw_latent_shallow'
 
     for i, faces in enumerate(dataset):
         left = front.run(None, {"input": np.expand_dims(faces[0].detach().numpy(), 0)})
