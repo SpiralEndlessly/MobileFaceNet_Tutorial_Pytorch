@@ -6,6 +6,7 @@ import os
 
 if __name__ == '__main__':
     front = ort.InferenceSession("MobileFaceNet_FrontShallow.onnx")
+    back = ort.InferenceSession("MobileFaceNet_BackShallow.onnx")
 
     transform = transforms.Compose([
             transforms.ToTensor(),  
@@ -16,7 +17,12 @@ if __name__ == '__main__':
 
     out_root = 'data_set/lfw_latent_shallow'
 
-    for i, faces in enumerate(dataset):
-        left = front.run(None, {"input": np.expand_dims(faces[0].detach().numpy(), 0)})
-        
-        np.save(os.path.join(out_root, f"{2*i+1:05d}.npy"), left[0])
+    for j in range(4):
+        for i in range(300):
+            index = j*300 + i
+
+            out_data = front.run(None, {"input": np.expand_dims(dataset[index][0].detach().numpy(), 0)})[0]
+            out_verify = front.run(None, {"input": np.expand_dims(dataset[index][0].detach().numpy(), 0)})[0]
+            out_verify = back.run(None, {"input": out_verify})[0]
+            np.save(os.path.join(out_root, f"data/{4*i + j:05d}.npy"), out_data)
+            np.save(os.path.join(out_root, f"verification/{4*i + j:05d}.npy"), out_verify)
